@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+    <title>Canvas</title>
+    <meta charset="utf-8" />
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.0.min.js"></script>
+</head>
+<body>
+    <canvas id="myCanvas" width="400" height="300">Canvas를 지원하지 않습니다.</canvas>
+    <script>
+        var canvas = $("#myCanvas").get(0);
+        var ctx = canvas.getContext("2d");
+
+        var myPic = new Image();
+        myPic.src = "images/duck.jpg";
+        myPic.onload = function() {
+            ctx.drawImage(myPic, 10, 10);
+        };
+    </script>
+</body>
+</html>
