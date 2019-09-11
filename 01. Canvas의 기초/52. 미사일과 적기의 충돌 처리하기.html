@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+    <title>Canvas</title>
+    <meta charset="utf-8" />
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.0.min.js"></script>
+</head>
+<body>
+    <canvas id="myCanvas" width="400" height="300">Canvas를 지원하지 않습니다.</canvas>
+    <script>
+        var canvas = $("#myCanvas").get(0);
+        var ctx = canvas.getContext("2d");
+
+        var canW = canvas.width;
+        var canH = canvas.height;
+        var enemySpeed = 0.5;
+        var speed = 5;
+        var keysDown = {};
+        var missiles = [];
+
+        var fighterImage = new Image();
+        fighterImage.src = "images/BlueFighter.png";
+
+        var enemyImage = new Image();
+        enemyImage.src = "images/EnemyFighter.png";
+
+        var enemies = [
+            {"id":"enemy1", "x":100, "y":-70, "w":43, "h":61},
+            {"id":"enemy2", "x":200, "y":-70, "w":43, "h":61},
+            {"id":"enemy3", "x":300, "y":-70, "w":43, "h":61}
+        ];
+
+        function Enemy() {
+            this.render = function() {
+                if(enemies.length === 0) {
+                    gameOver();
+                    return;
+                }
+
+                for(var i = 0; i < enemies.length; i++) {
+                    var enemyY = enemies[i].y += enemySpeed;
+                    ctx.drawImage(enemyImage, enemies[i].x, enemyY);
+                }
+            };
+        }
+
+        function Player() {
+            this.y = 250, this.x = canW * 0.5 - 25, this.w = 50, this.h = 45;
+
+            this.render = function() {
+                ctx.drawImage(fighterImage, this.x, this.y);
+
+                for(var i = 0; i < missiles.length; i++) {
+                    var m = missiles[i];
+                    ctx.fillStyle = m.bg;
+                    ctx.fillRect(m.x, m.y -= 5, m.w, m.h);
+
+                    checkCollision(m, i);
+
+                    if(m.y <= 0) {
+                        missiles.splice(i, 1);
+                    }
+                }
+            };
+        }
+
+        function checkCollision(m, mi) {
+            for(var i = 0; i < enemies.length; i++) {
+                var e = enemies[i];
+                if(m.x >= e.x && m.x <= e.x+e.w && m.y >= e.y && m.y <= e.y+e.h) {
+                    missiles.splice(missiles[mi], 1);
+                    enemies.splice(i, 1);
+                }
+            }
+        }
+
+        function gameOver() {
+            clearInterval(objAnimate);
+            ctx.font = "bold 36px Arial, sans-serif";
+            ctx.fillStyle = "#FC0";
+            ctx.textAlign = "center";
+            ctx.fillText("YOU WIN!", canW*0.5, 150);
+        }
+
+        function update() {
+            if(65 in keysDown) {
+                player.x -= speed;
+            } else if(68 in keysDown) {
+                player.x += speed;
+            }
+
+            if(player.x < 0) {
+                player.x = 0;
+            } else if(player.x > (canW - player.w)) {
+                player.x = canW - player.w;
+            }
+        }
+
+        var fire = true;
+
+        $(document).keydown(function(event) {
+            keysDown[event.keyCode] = true;
+
+            if(event.keyCode === 32 && fire === true) {
+                missiles.push({"x":player.x + player.w * 0.5, "y":player.y - 5, "w":3, "h":10, "bg":"red"});
+                fire = false;
+            }
+        });
+
+        $(document).keyup(function(event) {
+            if(event.keyCode === 32) {
+                fire = true;
+            }
+            delete keysDown[event.keyCode];
+        });
+
+        var player = new Player();
+        var enemy = new Enemy();
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            enemy.render();
+            update();
+            player.render();
+        }
+
+        var objAnimate = setInterval(animate, 30);
+    </script>
+</body>
+</html>

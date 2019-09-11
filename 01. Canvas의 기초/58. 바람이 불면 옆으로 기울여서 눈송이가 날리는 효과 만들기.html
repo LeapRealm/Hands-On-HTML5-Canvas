@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+    <title>Canvas</title>
+    <meta charset="utf-8" />
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.0.min.js"></script>
+</head>
+<body>
+    <canvas id="myCanvas" width="400" height="300">Canvas를 지원하지 않습니다.</canvas>
+    <script>
+        var canvas = $("#myCanvas").get(0);
+        var ctx = canvas.getContext("2d");
+
+        var ctxW = ctx.canvas.width + 100;
+        var ctxH = ctx.canvas.height + 100;
+
+        var bgImage = new Image();
+        bgImage.src = "images/winternight.jpg";
+
+        var snowflakes = [];
+
+        function addSnowflake() {
+            var x = Math.floor(Math.random() * ctxW) - 100;
+            var y = 0;
+            var size = Math.floor(Math.random() * 3) + 1;
+
+            snowflakes.push({"x":x, "y":y, "size":size});
+        }
+
+        function snow() {
+            addSnowflake();
+
+            ctx.fillStyle = "rgba(255,255,255,0.75)";
+
+            for(var i in snowflakes) {
+                ctx.beginPath();
+                var ty = snowflakes[i].y += snowflakes[i].size * 0.5;
+                ctx.arc(snowflakes[i].x, ty, snowflakes[i].size * 0.5, 0, Math.PI*2);
+                ctx.fill();
+
+                if(snowflakes[i].y > ctxH) {
+                    snowflakes.splice(i, 1);
+                }
+            }
+        }
+
+        function displayCount() {
+            ctx.fillStyle = "white";
+            ctx.font = "bold 14px Arial, sans-serif";
+            ctx.fillText(snowflakes.length, 10, 20);
+        }
+
+        function animate() {
+            ctx.save();
+            ctx.clearRect(0, 0, ctxW, ctxH);
+            ctx.drawImage(bgImage, 0, 0);
+            displayCount();
+            ctx.rotate(-0.2);
+            snow();
+            ctx.restore();
+        }
+
+        var animateInterval = setInterval(animate, 30);
+    </script>
+</body>
+</html>
