@@ -32,11 +32,16 @@
             ctx.drawImage(backImage, 0, 0);
         };
 
+        var moleX = new Array(100, 100, 200, 200, 300, 300);
+        var moleY = new Array(100, 250, 100, 250, 100, 250);
+
         var holeImage = new Image();
         holeImage.src = "images/hole.png";
 
         holeImage.onload = function() {
-            ctx.drawImage(holeImage, 100, 100);
+            for(var i = 0; i < moleX.length; i++) {
+                ctx.drawImage(holeImage, moleX[i], moleY[i]);
+            }
         };
     </script>
 </body>
