@@ -43,6 +43,14 @@
                 ctx.drawImage(holeImage, moleX[i], moleY[i]);
             }
         };
+
+        var moleImage = new Image();
+        moleImage.src = "images/mole.png";
+
+        moleImage.onload = function() {
+            var rand = Math.floor(Math.random() * 6);
+            ctx.drawImage(moleImage, moleX[rand], moleY[rand]);
+        };
     </script>
 </body>
 </html>
