@@ -25,32 +25,60 @@
         /** @type {CanvasRenderingContext2D} */
         var ctx = canvas.getContext("2d");
 
-        var backImage = new Image();
-        backImage.src = "images/background.png";
-
-        backImage.onload = function() {
-            ctx.drawImage(backImage, 0, 0);
-        };
-
         var moleX = new Array(100, 100, 200, 200, 300, 300);
         var moleY = new Array(100, 250, 100, 250, 100, 250);
+        var mousePos = {};
+        var pos = {};
+        var rand = 0;
+
+        var backImage = new Image();
+        backImage.src = "images/background.png";
 
         var holeImage = new Image();
         holeImage.src = "images/hole.png";
 
-        holeImage.onload = function() {
-            for(var i = 0; i < moleX.length; i++) {
-                ctx.drawImage(holeImage, moleX[i], moleY[i]);
-            }
-        };
-
         var moleImage = new Image();
         moleImage.src = "images/mole.png";
 
-        moleImage.onload = function() {
-            var rand = Math.floor(Math.random() * 6);
-            ctx.drawImage(moleImage, moleX[rand], moleY[rand]);
+        var hammerImage = new Image();
+        hammerImage.src = "images/hammer.png";
+
+        function getMousePos(event) {
+            var mouseX = event.clientX - ctx.canvas.offsetLeft;
+            var mouseY = event.clientY - ctx.canvas.offsetTop;
+
+            return {
+                x: mouseX,
+                y: mouseY
+            };
+        }
+
+        $(document).mousemove(function(event) {
+            mousePos = getMousePos(event);
+        });
+
+        var reset = function() {
+            rand = Math.floor(Math.random() * 6);
+            pos.x = moleX[rand];
+            pos.y = moleY[rand];
         };
+
+        var render = function() {
+            ctx.drawImage(backImage, 0, 0);
+            for(var i = 0; i < moleX.length; i++) {
+                ctx.drawImage(holeImage, moleX[i], moleY[i]);
+            }
+            ctx.drawImage(moleImage, moleX[rand], moleY[rand]);
+            ctx.drawImage(hammerImage, 0, 0, 60, 60, mousePos.x - 30, mousePos.y - 30, 60, 60);
+        };
+
+        var main = function() {
+            render();
+            requestAnimationFrame(main);
+        };
+
+        reset();
+        main();
     </script>
 </body>
 </html>
