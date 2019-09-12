@@ -16,9 +16,35 @@
             background: #FFFFFF;
             border: #909090 1px solid;
         }
+        .myAudio {
+            display: block;
+        }
+        .sound {
+            display: block;
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            width: 30px;
+            height: 25px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .sound-on {
+            background-image: url("images/soundOn.png");
+            background-repeat: no-repeat;
+        }
+        .sound-off {
+            background-image: url("images/soundOff.png");
+            background-repeat: no-repeat;
+        }
     </style>
 </head>
 <body>
+    <div class="sound sound-on"></div>
+    <audio class="myAudio" loop autoplay>
+        <source src="sounds/bg.mp3" type="audio/mpeg">
+    </audio>
+
     <canvas id="myCanvas" width="500" height="400">Canvas를 지원하지 않습니다.</canvas>
     <script>
         var canvas = document.getElementById("myCanvas");
@@ -60,6 +86,18 @@
                 reset();
                 render();
                 hitSound.play();
+            }
+        });
+
+        $(".sound").click(function() {
+            var $this = $(this);
+
+            if($this.hasClass("sound-on")) {
+                $this.removeClass("sound-on").addClass("sound-off");
+                $(".myAudio").trigger("pause");
+            } else {
+                $this.removeClass("sound-off").addClass("sound-on");
+                $(".myAudio").trigger("play");
             }
         });
 
