@@ -30,6 +30,9 @@
         var mousePos = {};
         var pos = {};
         var rand = 0;
+        var isMoleHit = false;
+        var acDelta = 0;
+        var msPerFrame = 50;
 
         var backImage = new Image();
         backImage.src = "images/background.png";
@@ -43,6 +46,14 @@
         var hammerImage = new Image();
         hammerImage.src = "images/hammer.png";
 
+        $(document).mousemove(function(event) {
+            mousePos = getMousePos(event);
+        });
+
+        $(document).mousedown(function(event) {
+            isMoleHit = true;
+        });
+
         function getMousePos(event) {
             var mouseX = event.clientX - ctx.canvas.offsetLeft;
             var mouseY = event.clientY - ctx.canvas.offsetTop;
@@ -53,10 +64,6 @@
             };
         }
 
-        $(document).mousemove(function(event) {
-            mousePos = getMousePos(event);
-        });
-
         var reset = function() {
             rand = Math.floor(Math.random() * 6);
             pos.x = moleX[rand];
@@ -65,11 +72,25 @@
 
         var render = function() {
             ctx.drawImage(backImage, 0, 0);
+
             for(var i = 0; i < moleX.length; i++) {
                 ctx.drawImage(holeImage, moleX[i], moleY[i]);
             }
+
             ctx.drawImage(moleImage, moleX[rand], moleY[rand]);
-            ctx.drawImage(hammerImage, 0, 0, 60, 60, mousePos.x - 30, mousePos.y - 30, 60, 60);
+
+            if(isMoleHit) {
+                ctx.drawImage(hammerImage, 60, 0, 60, 60, mousePos.x - 30, mousePos.y - 30, 60, 60);
+
+                if(acDelta > msPerFrame) {
+                    acDelta = 0;
+                    isMoleHit = false;
+                } else {
+                    acDelta++;
+                }
+            } else {
+                ctx.drawImage(hammerImage, 0, 0, 60, 60, mousePos.x - 30, mousePos.y - 30, 60, 60);
+            }
         };
 
         var main = function() {
