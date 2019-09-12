@@ -13,12 +13,22 @@
         /** @type {CanvasRenderingContext2D} */
         var ctx = canvas.getContext("2d");
 
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        var ctxW = canvas.width;
+        var ctxH = canvas.height;
+        var x = 200;
+        var y = 150;
 
-        ctx.beginPath();
-        ctx.fillStyle = "white";
-        ctx.arc(200, 150, 5, 0, Math.PI*2);
-        ctx.fill();
+        function animate() {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, ctxW, ctxH);
+
+            ctx.beginPath();
+            ctx.fillStyle = "white";
+            ctx.arc(x++, y+=0.5, 5, 0, Math.PI*2);
+            ctx.fill();    
+        }
+
+        setInterval(animate, 30);
     </script>
 </body>
 </html>
