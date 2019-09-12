@@ -31,6 +31,13 @@
         backImage.onload = function() {
             ctx.drawImage(backImage, 0, 0);
         };
+
+        var holeImage = new Image();
+        holeImage.src = "images/hole.png";
+
+        holeImage.onload = function() {
+            ctx.drawImage(holeImage, 100, 100);
+        };
     </script>
 </body>
 </html>
