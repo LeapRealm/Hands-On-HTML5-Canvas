@@ -33,6 +33,7 @@
         var isMoleHit = false;
         var acDelta = 0;
         var msPerFrame = 50;
+        var hitSound = new Audio("sounds/hit.mp3");
 
         var backImage = new Image();
         backImage.src = "images/background.png";
@@ -58,6 +59,7 @@
                 isMoleHit = true;
                 reset();
                 render();
+                hitSound.play();
             }
         });
 
