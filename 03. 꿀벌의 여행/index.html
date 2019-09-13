@@ -29,6 +29,16 @@
         backImage.onload = function() {
             ctx.drawImage(backImage, 0, 0);
         };
+
+        var bee = {};
+        bee.x = canvas.width / 2;
+        bee.y = canvas.height / 2;
+
+        var beeImage = new Image();
+        beeImage.src = "images/bee.png";
+        beeImage.onload = function() {
+            ctx.drawImage(beeImage, 0, 0, 32, 48, bee.x, bee.y, 32, 48);
+        };
     </script>
 </body>
 </html>
