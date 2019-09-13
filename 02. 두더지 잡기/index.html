@@ -60,6 +60,8 @@
         var acDelta = 0;
         var msPerFrame = 50;
         var hitSound = new Audio("sounds/hit.mp3");
+        var score = 0;
+        var times = 0;
 
         var backImage = new Image();
         backImage.src = "images/background.png";
@@ -86,6 +88,7 @@
                 reset();
                 render();
                 hitSound.play();
+                ++score;
             }
         });
 
@@ -142,6 +145,18 @@
             } else {
                 ctx.drawImage(hammerImage, 0, 0, 60, 60, mousePos.x - 30, mousePos.y - 30, 60, 60);
             }
+
+            ctx.fillStyle = "rgb(250, 250, 250)";
+            ctx.font = "bold 24px Arial, sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+            ctx.fillText("SCORE: " + score, canvas.width / 2, 10);
+            ctx.strokeText("SCORE: " + score, canvas.width / 2, 10);
+
+            times++;
+            ctx.fillStyle = "black";
+            ctx.textAlign = "right";
+            ctx.fillText("TIME: " + Math.round(times / 100), canvas.width - 10, 10);
         };
 
         var isHit = function(x, y) {
