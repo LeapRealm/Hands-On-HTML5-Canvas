@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+    <title>두더지 잡기</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.0.min.js"></script>
+    <style>
+        body {
+            margin: 10px;
+            background: #D0D0D0;
+        }
+        #myCanvas {
+            display: none;
+            background: #FFFFFF;
+            border: #909090 1px solid;
+        }
+        #SplashScreen {
+            width: 500px;
+            height: 400px;
+            background-image: url("images/background.png");
+            background-repeat: none;
+            border: #909090 1px solid;
+        }
+        #mainImage {
+            position: absolute;
+            top: 145px;
+            left: 250px;
+            width: 62px;
+            height: 61px;
+            background-image: url("images/mole.png");
+            background-repeat: none;
+        }
+        #btnStart {
+            position: absolute;
+            top: 200px;
+            left: 230px;
+            width: 100px;
+            height: 41px;
+            background-image: url("images/playbutton.png");
+            background-repeat: none;
+        }
+        #btnStart:hover {
+            opacity: 0.8;
+            cursor: pointer;
+        }
+        .myAudio {
+            display: none;
+        }
+        .sound {
+            display: none;
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            width: 30px;
+            height: 25px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .sound-on {
+            background-image: url("images/soundOn.png");
+            background-repeat: no-repeat;
+        }
+        .sound-off {
+            background-image: url("images/soundOff.png");
+            background-repeat: no-repeat;
+        }
+    </style>
+</head>
+<body>
+    <div id="SplashScreen">
+        <span id="mainImage"></span>
+        <span id="btnStart"></span>
+    </div>
+    <div class="sound sound-on"></div>
+    <audio class="myAudio" loop>
+        <source src="sounds/bg.mp3" type="audio/mpeg">
+    </audio>
+
+    <canvas id="myCanvas" width="500" height="400">Canvas를 지원하지 않습니다.</canvas>
+    <script>
+        var canvas = document.getElementById("myCanvas");
+        /** @type {CanvasRenderingContext2D} */
+        var ctx = canvas.getContext("2d");
+
+        var moleX = new Array(100, 100, 200, 200, 300, 300);
+        var moleY = new Array(100, 250, 100, 250, 100, 250);
+        var mousePos = {};
+        var pos = {};
+        var rand = 0;
+        var isMoleHit = false;
+        var acDelta = 0;
+        var msPerFrame = 50;
+        var hitSound = new Audio("sounds/hit.mp3");
+        var score = 0;
+        var times = 0;
+
+        var backImage = new Image();
+        backImage.src = "images/background.png";
+
+        var holeImage = new Image();
+        holeImage.src = "images/hole.png";
+
+        var moleImage = new Image();
+        moleImage.src = "images/mole.png";
+
+        var hammerImage = new Image();
+        hammerImage.src = "images/hammer.png";
+
+        $(document).mousemove(function(event) {
+            mousePos = getMousePos(event);
+        });
+
+        $(document).mousedown(function(event) {
+            var mouseX = event.clientX - ctx.canvas.offsetLeft;
+            var mouseY = event.clientY - ctx.canvas.offsetTop;
+
+            if(isHit(mouseX, mouseY) && isMoleHit === false) {
+                isMoleHit = true;
+                reset();
+                render();
+                hitSound.play();
+                ++score;
+            }
+        });
+
+        $(".sound").click(function() {
+            var $this = $(this);
+
+            if($this.hasClass("sound-on")) {
+                $this.removeClass("sound-on").addClass("sound-off");
+                $(".myAudio").trigger("pause");
+            } else {
+                $this.removeClass("sound-off").addClass("sound-on");
+                $(".myAudio").trigger("play");
+            }
+        });
+
+        $("#btnStart").click(function() {
+            $("#SplashScreen").hide();
+            $("#myCanvas").show();
+            reset();
+            main();
+            $(".sound").css("display", "block");
+            $(".myAudio").trigger("play");
+        });
+
+        function getMousePos(event) {
+            var mouseX = event.clientX - ctx.canvas.offsetLeft;
+            var mouseY = event.clientY - ctx.canvas.offsetTop;
+
+            return {
+                x: mouseX,
+                y: mouseY
+            };
+        }
+
+        var reset = function() {
+            rand = Math.floor(Math.random() * 6);
+            pos.x = moleX[rand];
+            pos.y = moleY[rand];
+        };
+
+        var render = function() {
+            ctx.drawImage(backImage, 0, 0);
+
+            for(var i = 0; i < moleX.length; i++) {
+                ctx.drawImage(holeImage, moleX[i], moleY[i]);
+            }
+
+            if(isMoleHit) {
+                ctx.globalAlpha = 0;
+            }
+            ctx.drawImage(moleImage, moleX[rand], moleY[rand]);
+            ctx.globalAlpha = 1;
+
+            if(isMoleHit) {
+                ctx.drawImage(hammerImage, 60, 0, 60, 60, mousePos.x - 30, mousePos.y - 30, 60, 60);
+
+                if(acDelta > msPerFrame) {
+                    acDelta = 0;
+                    isMoleHit = false;
+                } else {
+                    acDelta++;
+                }
+            } else {
+                ctx.drawImage(hammerImage, 0, 0, 60, 60, mousePos.x - 30, mousePos.y - 30, 60, 60);
+            }
+
+            ctx.fillStyle = "rgb(250, 250, 250)";
+            ctx.font = "bold 24px Arial, sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+            ctx.fillText("SCORE: " + score, canvas.width / 2, 10);
+            ctx.strokeText("SCORE: " + score, canvas.width / 2, 10);
+
+            times++;
+            ctx.fillStyle = "black";
+            ctx.textAlign = "right";
+            ctx.fillText("TIME: " + Math.round(times / 60), canvas.width - 10, 10);
+        };
+
+        var isHit = function(x, y) {
+            return (x <= (pos.x + 60)) && (x >= pos.x) && (y <= (pos.y + 60)) && (y >= pos.y);
+        };
+
+        var main = function() {
+            render();
+            requestAnimationFrame(main);
+        };
+
+        reset();
+        main();
+    </script>
+</body>
+</html>
