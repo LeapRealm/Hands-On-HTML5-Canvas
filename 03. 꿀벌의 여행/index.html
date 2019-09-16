@@ -33,6 +33,20 @@
         var beeReady = false;
 
         var keysDown = {};
+        var beeOffset = 0;
+
+        var frame = 0;
+        var lastUpdateTime = Date.now();
+        var msPerFrame = 30;
+
+        var flower = {};
+        var flowerReady = false;
+        
+        var flowerImage = new Image();
+        flowerImage.src = "images/flower.png";
+        flowerImage.onload = function() {
+            flowerReady = true;
+        };
 
         var backImage = new Image();
         backImage.src = "images/background.png";
@@ -46,28 +60,66 @@
             beeReady = true;
         };
 
+        var reset = function() {
+            flower.x = 32 + (Math.random() * (canvas.width - 64));
+            flower.y = 32 + (Math.random() * (canvas.height - 64));
+        };
+
         var update = function() {
             if(38 in keysDown) {
                 bee.y -= bee.speed;
+                beeOffset = 144;
             }
             if(40 in keysDown) {
                 bee.y += bee.speed;
+                beeOffset = 0;
             }
             if(37 in keysDown) {
                 bee.x -= bee.speed;
+                beeOffset = 48;
             }
             if(39 in keysDown) {
                 bee.x += bee.speed;
+                beeOffset = 96;
+            }
+
+            if(bee.x <= 0) {
+                bee.x = 0;
+            }
+            if(bee.x >= canvas.width - 32) {
+                bee.x = canvas.width - 32;
+            }
+            if(bee.y <= 0) {
+                bee.y = 0;
+            }
+            if(bee.y >= canvas.height - 48) {
+                bee.y = canvas.height - 48;
+            }
+
+            if(flower.x < (bee.x + 32) && (flower.x + 32) > bee.x && flower.y < (bee.y + 40) && (flower.y + 32) > bee.y) {
+                reset();
             }
         };
 
         var render = function() {
-            if(backReady) {
-                ctx.drawImage(backImage, 0, 0);
+            if(Date.now() >= lastUpdateTime + msPerFrame) {
+                lastUpdateTime = Date.now();
+
+                if(backReady) {
+                    ctx.drawImage(backImage, 0, 0);
+                }
+                if(beeReady) {
+                    ctx.drawImage(beeImage, frame * 32, beeOffset, 32, 48, bee.x, bee.y, 32, 48);
+                }
+                if(flowerReady) {
+                    ctx.drawImage(flowerImage, flower.x, flower.y);
+                }
+
+                frame++;
+                if(frame >= 3) {
+                    frame = 0;
+                }
             }
-            if(beeReady) {
-                ctx.drawImage(beeImage, 0, 0, 32, 48, bee.x, bee.y, 32, 48);
-            }  
         };
 
         var main = function() {
@@ -84,6 +136,7 @@
             delete keysDown[e.keyCode];
         }, false);
 
+        reset();
         main();
     </script>
 </body>
