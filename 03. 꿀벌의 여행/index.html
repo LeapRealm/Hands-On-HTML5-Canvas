@@ -24,21 +24,67 @@
         /** @type {CanvasRenderingContext2D} */
         var ctx = canvas.getContext("2d");
 
-        var backImage = new Image();
-        backImage.src = "images/background.png";
-        backImage.onload = function() {
-            ctx.drawImage(backImage, 0, 0);
-        };
-
         var bee = {};
         bee.x = canvas.width / 2;
         bee.y = canvas.height / 2;
+        bee.speed = 5;
+
+        var backReady = false;
+        var beeReady = false;
+
+        var keysDown = {};
+
+        var backImage = new Image();
+        backImage.src = "images/background.png";
+        backImage.onload = function() {
+            backReady = true;
+        };
 
         var beeImage = new Image();
         beeImage.src = "images/bee.png";
         beeImage.onload = function() {
-            ctx.drawImage(beeImage, 0, 0, 32, 48, bee.x, bee.y, 32, 48);
+            beeReady = true;
         };
+
+        var update = function() {
+            if(38 in keysDown) {
+                bee.y -= bee.speed;
+            }
+            if(40 in keysDown) {
+                bee.y += bee.speed;
+            }
+            if(37 in keysDown) {
+                bee.x -= bee.speed;
+            }
+            if(39 in keysDown) {
+                bee.x += bee.speed;
+            }
+        };
+
+        var render = function() {
+            if(backReady) {
+                ctx.drawImage(backImage, 0, 0);
+            }
+            if(beeReady) {
+                ctx.drawImage(beeImage, 0, 0, 32, 48, bee.x, bee.y, 32, 48);
+            }  
+        };
+
+        var main = function() {
+            update();
+            render();
+            requestAnimationFrame(main);
+        };
+
+        addEventListener("keydown", function(e) {
+            keysDown[e.keyCode] = true;
+        }, false);
+
+        addEventListener("keyup", function(e) {
+            delete keysDown[e.keyCode];
+        }, false);
+
+        main();
     </script>
 </body>
 </html>
