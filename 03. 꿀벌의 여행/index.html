@@ -36,9 +36,8 @@
         var beeOffset = 0;
 
         var frame = 0;
-        var lastUpdateTime = 0;
-        var acDelta = 0;
-        var msPerFrame = 1000;
+        var lastUpdateTime = Date.now();
+        var msPerFrame = 30;
 
         var flower = {};
         var flowerReady = false;
@@ -96,14 +95,15 @@
             if(bee.y >= canvas.height - 48) {
                 bee.y = canvas.height - 48;
             }
+
+            if(flower.x < (bee.x + 32) && (flower.x + 32) > bee.x && flower.y < (bee.y + 40) && (flower.y + 32) > bee.y) {
+                console.log("hit");
+            }
         };
 
-        // lastUpdateTime은 사용하지 않는 변수, 로직에 문제가 있어보임.
         var render = function() {
-            var delta = Date.now() - lastUpdateTime;
-
-            if(acDelta > msPerFrame) {
-                acDelta = 0;
+            if(Date.now() >= lastUpdateTime + msPerFrame) {
+                lastUpdateTime = Date.now();
 
                 if(backReady) {
                     ctx.drawImage(backImage, 0, 0);
@@ -119,8 +119,6 @@
                 if(frame >= 3) {
                     frame = 0;
                 }
-            } else {
-                acDelta += delta;
             }
         };
 
