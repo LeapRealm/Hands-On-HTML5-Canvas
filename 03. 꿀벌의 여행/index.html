@@ -35,6 +35,11 @@
         var keysDown = {};
         var beeOffset = 0;
 
+        var frame = 0;
+        var lastUpdateTime = 0;
+        var acDelta = 0;
+        var msPerFrame = 1000;
+
         var backImage = new Image();
         backImage.src = "images/background.png";
         backImage.onload = function() {
@@ -79,13 +84,27 @@
             }
         };
 
+        // lastUpdateTime은 사용하지 않는 변수, 로직에 문제가 있어보임.
         var render = function() {
-            if(backReady) {
-                ctx.drawImage(backImage, 0, 0);
+            var delta = Date.now() - lastUpdateTime;
+
+            if(acDelta > msPerFrame) {
+                acDelta = 0;
+
+                if(backReady) {
+                    ctx.drawImage(backImage, 0, 0);
+                }
+                if(beeReady) {
+                    ctx.drawImage(beeImage, frame * 32, beeOffset, 32, 48, bee.x, bee.y, 32, 48);
+                }
+
+                frame++;
+                if(frame >= 3) {
+                    frame = 0;
+                }
+            } else {
+                acDelta += delta;
             }
-            if(beeReady) {
-                ctx.drawImage(beeImage, 0, beeOffset, 32, 48, bee.x, bee.y, 32, 48);
-            }  
         };
 
         var main = function() {
