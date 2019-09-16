@@ -59,6 +59,19 @@
             if(39 in keysDown) {
                 bee.x += bee.speed;
             }
+
+            if(bee.x <= 0) {
+                bee.x = 0;
+            }
+            if(bee.x >= canvas.width - 32) {
+                bee.x = canvas.width - 32;
+            }
+            if(bee.y <= 0) {
+                bee.y = 0;
+            }
+            if(bee.y >= canvas.height - 48) {
+                bee.y = canvas.height - 48;
+            }
         };
 
         var render = function() {
