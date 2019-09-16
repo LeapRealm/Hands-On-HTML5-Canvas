@@ -33,6 +33,7 @@
         var beeReady = false;
 
         var keysDown = {};
+        var beeOffset = 0;
 
         var backImage = new Image();
         backImage.src = "images/background.png";
@@ -49,15 +50,19 @@
         var update = function() {
             if(38 in keysDown) {
                 bee.y -= bee.speed;
+                beeOffset = 144;
             }
             if(40 in keysDown) {
                 bee.y += bee.speed;
+                beeOffset = 0;
             }
             if(37 in keysDown) {
                 bee.x -= bee.speed;
+                beeOffset = 48;
             }
             if(39 in keysDown) {
                 bee.x += bee.speed;
+                beeOffset = 96;
             }
 
             if(bee.x <= 0) {
@@ -79,7 +84,7 @@
                 ctx.drawImage(backImage, 0, 0);
             }
             if(beeReady) {
-                ctx.drawImage(beeImage, 0, 0, 32, 48, bee.x, bee.y, 32, 48);
+                ctx.drawImage(beeImage, 0, beeOffset, 32, 48, bee.x, bee.y, 32, 48);
             }  
         };
 
