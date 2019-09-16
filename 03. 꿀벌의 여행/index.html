@@ -40,6 +40,15 @@
         var acDelta = 0;
         var msPerFrame = 1000;
 
+        var flower = {};
+        var flowerReady = false;
+        
+        var flowerImage = new Image();
+        flowerImage.src = "images/flower.png";
+        flowerImage.onload = function() {
+            flowerReady = true;
+        };
+
         var backImage = new Image();
         backImage.src = "images/background.png";
         backImage.onload = function() {
@@ -50,6 +59,11 @@
         beeImage.src = "images/bee.png";
         beeImage.onload = function() {
             beeReady = true;
+        };
+
+        var reset = function() {
+            flower.x = 32 + (Math.random() * (canvas.width - 64));
+            flower.y = 32 + (Math.random() * (canvas.height - 64));
         };
 
         var update = function() {
@@ -97,6 +111,9 @@
                 if(beeReady) {
                     ctx.drawImage(beeImage, frame * 32, beeOffset, 32, 48, bee.x, bee.y, 32, 48);
                 }
+                if(flowerReady) {
+                    ctx.drawImage(flowerImage, flower.x, flower.y);
+                }
 
                 frame++;
                 if(frame >= 3) {
@@ -121,6 +138,7 @@
             delete keysDown[e.keyCode];
         }, false);
 
+        reset();
         main();
     </script>
 </body>
