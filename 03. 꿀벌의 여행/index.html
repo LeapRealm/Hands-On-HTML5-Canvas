@@ -65,6 +65,8 @@
 
         var flower = {};
         var flowerReady = false;
+
+        var hitSound = new Audio("sounds/hit.mp3");
         
         var flowerImage = new Image();
         flowerImage.src = "images/flower.png";
@@ -122,6 +124,7 @@
 
             if(flower.x < (bee.x + 32) && (flower.x + 32) > bee.x && flower.y < (bee.y + 40) && (flower.y + 32) > bee.y) {
                 reset();
+                hitSound.play();
             }
         };
 
