@@ -15,9 +15,33 @@
             background: #FFFFFF;
             border: #909090 1px solid;
         }
+        .myAudio {
+            display: none;
+        }
+        .sound {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            width: 30px;
+            height: 25px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .sound-on {
+            background-image: url("images/soundOn.png");
+            background-repeat: no-repeat;
+        }
+        .sound-off {
+            background-image: url("images/soundOff.png");
+            background-repeat: no-repeat;
+        }
     </style>
 </head>
 <body>
+    <div class="sound sound-on"></div>
+    <audio class="myAudio" autoplay loop>
+        <source src="sounds/bg.mp3" type="audio/mpeg">
+    </audio>
     <canvas id="myCanvas" width="500" height="400">Canvas를 지원하지 않습니다.</canvas>
     <script>
         var canvas = document.getElementById("myCanvas");
@@ -41,6 +65,10 @@
 
         var flower = {};
         var flowerReady = false;
+
+        var hitSound = new Audio("sounds/hit.mp3");
+        var score = 0;
+        var startTime = Date.now();
         
         var flowerImage = new Image();
         flowerImage.src = "images/flower.png";
@@ -98,6 +126,8 @@
 
             if(flower.x < (bee.x + 32) && (flower.x + 32) > bee.x && flower.y < (bee.y + 40) && (flower.y + 32) > bee.y) {
                 reset();
+                hitSound.play();
+                score++;
             }
         };
 
@@ -120,6 +150,16 @@
                     frame = 0;
                 }
             }
+
+            ctx.fillStyle = "rgb(250, 250, 250)";
+            ctx.font = "bold 20px Arial, sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+            ctx.fillText("SCORE: " + score, canvas.width / 2, 10);
+
+            ctx.fillStyle = "black";
+            ctx.textAlign = "right";
+            ctx.fillText("TIME: " + Math.floor((Date.now() - startTime)/1000), canvas.width - 10, 10);
         };
 
         var main = function() {
@@ -135,6 +175,18 @@
         addEventListener("keyup", function(e) {
             delete keysDown[e.keyCode];
         }, false);
+
+        $(".sound").click(function() {
+            var $this = $(this);
+
+            if($this.hasClass("sound-on")) {
+                $this.removeClass("sound-on").addClass("sound-off");
+                $(".myAudio").trigger("pause");
+            } else {
+                $this.removeClass("sound-off").addClass("sound-on");
+                $(".myAudio").trigger("play");
+            }
+        });
 
         reset();
         main();
