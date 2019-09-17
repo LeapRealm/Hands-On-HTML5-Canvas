@@ -67,6 +67,8 @@
         var flowerReady = false;
 
         var hitSound = new Audio("sounds/hit.mp3");
+        var score = 0;
+        var startTime = Date.now();
         
         var flowerImage = new Image();
         flowerImage.src = "images/flower.png";
@@ -125,6 +127,7 @@
             if(flower.x < (bee.x + 32) && (flower.x + 32) > bee.x && flower.y < (bee.y + 40) && (flower.y + 32) > bee.y) {
                 reset();
                 hitSound.play();
+                score++;
             }
         };
 
@@ -147,6 +150,16 @@
                     frame = 0;
                 }
             }
+
+            ctx.fillStyle = "rgb(250, 250, 250)";
+            ctx.font = "bold 20px Arial, sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "top";
+            ctx.fillText("SCORE: " + score, canvas.width / 2, 10);
+
+            ctx.fillStyle = "black";
+            ctx.textAlign = "right";
+            ctx.fillText("TIME: " + Math.floor((Date.now() - startTime)/1000), canvas.width - 10, 10);
         };
 
         var main = function() {
