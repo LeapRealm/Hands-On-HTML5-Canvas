@@ -24,22 +24,87 @@
         /** @type {CanvasRenderingContext2D} */
         var ctx = canvas.getContext("2d");
 
-        var bgImage = new Image();
-        bgImage.src = "images/space.png";
-        bgImage.onload = function() {
-            ctx.drawImage(bgImage, 0, 0);
-        };
+        var keysDown = {};
+        var lastUpdateTime = Date.now();
+        var msPerFrame = 15;
 
-        var fighterImage = new Image();
-        fighterImage.src = "images/fighter.png";
-        fighterImage.onload = function() {
-            ctx.drawImage(fighterImage, fighter.x, fighter.y);
-        };
+        var bool_bg = false;
+        var bool_fighter = false;
 
         var fighter = {};
         fighter.x = 50;
         fighter.y = canvas.height / 2;
         fighter.speed = 5;
+
+        var bgImage = new Image();
+        bgImage.src = "images/space.png";
+        bgImage.onload = function() {
+            bool_bg = true;
+        };
+
+        var fighterImage = new Image();
+        fighterImage.src = "images/fighter.png";
+        fighterImage.onload = function() {
+            bool_fighter = true;
+        };
+
+        var update = function() {
+            if(87 in keysDown) {
+                fighter.y -= fighter.speed;
+            }
+            if(83 in keysDown) {
+                fighter.y += fighter.speed;
+            }
+            if(65 in keysDown) {
+                fighter.x -= fighter.speed;
+            }
+            if(68 in keysDown) {
+                fighter.x += fighter.speed;
+            }
+
+            if(fighter.x <= 0) {
+                fighter.x = 0;
+            }
+            if(fighter.x >= canvas.width - 60) {
+                fighter.x = canvas.width - 60;
+            }
+            if(fighter.y <= 0) {
+                fighter.y = 0;
+            }
+            if(fighter.y >= canvas.height - 30) {
+                fighter.y = canvas.height - 30;
+            }
+        };
+
+        addEventListener("keydown", function(e) {
+            keysDown[e.keyCode] = true;
+        }, false);
+
+        addEventListener("keyup", function(e) {
+            delete keysDown[e.keyCode];
+        }, false);
+
+        var render = function() {
+            if(Date.now() > lastUpdateTime  + msPerFrame) {
+                lastUpdateTime = Date.now();
+
+                if(bool_bg) {
+                    ctx.drawImage(bgImage, 0, 0);
+                }
+
+                if(bool_fighter) {
+                    ctx.drawImage(fighterImage, fighter.x, fighter.y);
+                }
+            }
+        };
+
+        var main = function() {
+            update();
+            render();
+            requestAnimationFrame(main);
+        };
+
+        main();
     </script>
 </body>
 </html>
