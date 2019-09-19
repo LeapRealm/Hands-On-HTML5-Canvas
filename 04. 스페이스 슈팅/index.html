@@ -26,10 +26,20 @@
 
         var bgImage = new Image();
         bgImage.src = "images/space.png";
-
         bgImage.onload = function() {
             ctx.drawImage(bgImage, 0, 0);
         };
+
+        var fighterImage = new Image();
+        fighterImage.src = "images/fighter.png";
+        fighterImage.onload = function() {
+            ctx.drawImage(fighterImage, fighter.x, fighter.y);
+        };
+
+        var fighter = {};
+        fighter.x = 50;
+        fighter.y = canvas.height / 2;
+        fighter.speed = 5;
     </script>
 </body>
 </html>
