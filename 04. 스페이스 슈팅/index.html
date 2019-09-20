@@ -44,7 +44,10 @@
         asteroid.x = canvas.width;
         asteroid.y = Math.floor(Math.random() * 350);
         var bool_asteroid = false;
-        var speed = 10;
+        var speed = 0;
+        var randScale;
+        var ang = 0;
+        var arrScale = [0.4, 0.6, 0.8, 1];
 
         var asteroidImage = new Image();
         asteroidImage.src = "images/asteroid.png";
@@ -136,8 +139,15 @@
             }
         }
 
-        function moveAstroid() {
-            ctx.drawImage(asteroidImage, asteroid.x -= speed, asteroid.y);
+        function shuffle(arr) {
+            var rand = Math.floor((Math.random() * arr.length));
+            return arr[rand];
+        }
+
+        var reset = function() {
+            speed = Math.floor(Math.random() * 5) + 5;
+            asteroid.x = canvas.width;
+            asteroid.y = Math.floor(Math.random() * 350);
 
             if(asteroid.y < 40) {
                 asteroid.y = 40;
@@ -145,9 +155,25 @@
             if(asteroid.y > 360) {
                 asteroid.y = 360;
             }
+
+            randScale = shuffle(arrScale);
+        };
+
+        function moveAstroid() {
+            var w = asteroidImage.width * randScale;
+            var h = asteroidImage.height * randScale;
+            var coordX = (asteroidImage.width / 2) * randScale;
+            var coordY = (asteroidImage.height / 2) * randScale;
+
+            ctx.save();
+            ctx.translate(asteroid.x + coordX, asteroid.y + coordY);
+            ctx.rotate(Math.PI / 180 * (ang += 5));
+            ctx.translate(-asteroid.x - coordX, -asteroid.y - coordY);
+            ctx.drawImage(asteroidImage, asteroid.x -= speed, asteroid.y, w, h);
+            ctx.restore();
+
             if(asteroid.x < -100) {
-                asteroid.x = canvas.width;
-                asteroid.y = Math.floor(Math.random() * 350);
+                reset();
             }
         }
 
@@ -190,6 +216,7 @@
         };
 
         var background = new Background();
+        reset();
         main();
     </script>
 </body>
