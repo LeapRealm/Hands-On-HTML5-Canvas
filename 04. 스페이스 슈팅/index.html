@@ -26,7 +26,7 @@
 
         var keysDown = {};
         var lastUpdateTime = Date.now();
-        var msPerFrame = 16;
+        var msPerFrame = 8;
 
         var bool_bg = false;
         var bool_fighter = false;
@@ -41,7 +41,10 @@
         var laserTotal = 10;
 
         var asteroid = {};
+        asteroid.x = canvas.width;
+        asteroid.y = Math.floor(Math.random() * 350);
         var bool_asteroid = false;
+        var speed = 10;
 
         var asteroidImage = new Image();
         asteroidImage.src = "images/asteroid.png";
@@ -133,6 +136,21 @@
             }
         }
 
+        function moveAstroid() {
+            ctx.drawImage(asteroidImage, asteroid.x -= speed, asteroid.y);
+
+            if(asteroid.y < 40) {
+                asteroid.y = 40;
+            }
+            if(asteroid.y > 360) {
+                asteroid.y = 360;
+            }
+            if(asteroid.x < -100) {
+                asteroid.x = canvas.width;
+                asteroid.y = Math.floor(Math.random() * 350);
+            }
+        }
+
         var Background = function() {
             this.x = 0, this.y = 0;
 
@@ -160,7 +178,7 @@
                     ctx.drawImage(fighterImage, fighter.x, fighter.y);
                 }
                 if(bool_asteroid) {
-                    ctx.drawImage(asteroidImage, 500, 200);
+                    moveAstroid();
                 }
             }
         };
