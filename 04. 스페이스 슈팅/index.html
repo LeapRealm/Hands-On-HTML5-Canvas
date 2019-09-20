@@ -26,15 +26,19 @@
 
         var keysDown = {};
         var lastUpdateTime = Date.now();
-        var msPerFrame = 15;
+        var msPerFrame = 16;
 
         var bool_bg = false;
         var bool_fighter = false;
+        var bool_laser = false;
 
         var fighter = {};
         fighter.x = 50;
         fighter.y = canvas.height / 2;
         fighter.speed = 5;
+
+        var lasers = [];
+        var laserTotal = 10;
 
         var bgImage = new Image();
         bgImage.src = "images/space.png";
@@ -46,6 +50,12 @@
         fighterImage.src = "images/fighter.png";
         fighterImage.onload = function() {
             bool_fighter = true;
+        };
+
+        var laserImage = new Image();
+        laserImage.src = "images/laser.png";
+        laserImage.onload = function() {
+            bool_laser = true;
         };
 
         var update = function() {
@@ -76,22 +86,55 @@
             }
         };
 
+        var canFire = true;
+
         addEventListener("keydown", function(e) {
             keysDown[e.keyCode] = true;
+
+            if(e.keyCode === 32 && lasers.length <= laserTotal && canFire === true) {
+                lasers.push([fighter.x + 50, fighter.y + 10]);
+                canFire = false;
+            }
         }, false);
 
         addEventListener("keyup", function(e) {
             delete keysDown[e.keyCode];
+
+            if(e.keyCode === 32) {
+                canFire = true;
+            }
         }, false);
 
+        function drawLaser() {
+            if(lasers.length) {
+                for(var i = 0; i < lasers.length; i++) {
+                    ctx.drawImage(laserImage, lasers[i][0], lasers[i][1]);
+                }
+            }
+        }
+
+        function moveLaser() {
+            for(var i = 0; i < lasers.length; i++) {
+                if(lasers[i][0] > 0) {
+                    lasers[i][0] += 20;
+                }
+                if(lasers[i][0] > 600) {
+                    lasers.splice(i, 1);
+                }
+            }
+        }
+
         var render = function() {
-            if(Date.now() > lastUpdateTime  + msPerFrame) {
+            if(Date.now() > lastUpdateTime + msPerFrame) {
                 lastUpdateTime = Date.now();
 
                 if(bool_bg) {
                     ctx.drawImage(bgImage, 0, 0);
                 }
-
+                if(bool_laser) {
+                    drawLaser();
+                    moveLaser();
+                }
                 if(bool_fighter) {
                     ctx.drawImage(fighterImage, fighter.x, fighter.y);
                 }
