@@ -124,12 +124,24 @@
             }
         }
 
+        var Background = function() {
+            this.x = 0, this.y = 0;
+
+            this.render = function() {
+                ctx.drawImage(bgImage, this.x--, 0);
+                
+                if(this.x <= -600) {
+                    this.x = 0;
+                }
+            };
+        };
+
         var render = function() {
             if(Date.now() > lastUpdateTime + msPerFrame) {
                 lastUpdateTime = Date.now();
 
                 if(bool_bg) {
-                    ctx.drawImage(bgImage, 0, 0);
+                    background.render();
                 }
                 if(bool_laser) {
                     drawLaser();
@@ -147,6 +159,7 @@
             requestAnimationFrame(main);
         };
 
+        var background = new Background();
         main();
     </script>
 </body>
