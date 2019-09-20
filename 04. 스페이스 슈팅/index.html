@@ -40,6 +40,15 @@
         var lasers = [];
         var laserTotal = 10;
 
+        var asteroid = {};
+        var bool_asteroid = false;
+
+        var asteroidImage = new Image();
+        asteroidImage.src = "images/asteroid.png";
+        asteroidImage.onload = function() {
+            bool_asteroid = true;
+        };
+
         var bgImage = new Image();
         bgImage.src = "images/space.png";
         bgImage.onload = function() {
@@ -149,6 +158,9 @@
                 }
                 if(bool_fighter) {
                     ctx.drawImage(fighterImage, fighter.x, fighter.y);
+                }
+                if(bool_asteroid) {
+                    ctx.drawImage(asteroidImage, 500, 200);
                 }
             }
         };
