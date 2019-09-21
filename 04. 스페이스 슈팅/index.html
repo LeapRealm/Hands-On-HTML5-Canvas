@@ -26,7 +26,7 @@
 
         var keysDown = {};
         var lastUpdateTime = Date.now();
-        var msPerFrame = 8;
+        var msPerFrame = 16;
 
         var bool_bg = false;
         var bool_fighter = false;
@@ -48,6 +48,15 @@
         var randScale;
         var ang = 0;
         var arrScale = [0.4, 0.6, 0.8, 1];
+
+        var explodes = [];
+        var bool_explode = false;
+
+        var explodeImage = new Image();
+        explodeImage.src = "images/explode.png";
+        explodeImage.onload = function() {
+            bool_explode = true;
+        };
 
         var asteroidImage = new Image();
         asteroidImage.src = "images/asteroid.png";
@@ -189,8 +198,23 @@
                 for(var i = 0; i < lasers.length; i++) {
                     if(asteroid.x < lasers[i][0] + lw && asteroid.x + aw > lasers[i][0] && 
                        asteroid.y < lasers[i][1] + lh && asteroid.y + ah > lasers[i][1]) {
+                        explodes.push({"x": lasers[i][0], "y": lasers[i][1], "spriteCount": 0});
                         lasers.splice(i, 1);
                         reset();
+                    }
+                }
+            }
+        }
+
+        function drawExplode() {
+            if(explodes.length) {
+                for(var i = 0; i < explodes.length; i++) {
+                    ctx.drawImage(explodeImage, explodes[i].spriteCount * 39, 0, 39, 40, 
+                    explodes[i].x, explodes[i].y, 39*2, 40*2);
+
+                    explodes[i].spriteCount++;
+                    if(explodes[i].spriteCount > 13) {
+                        explodes.splice(i, 1);
                     }
                 }
             }
@@ -224,6 +248,9 @@
                 }
                 if(bool_asteroid) {
                     moveAstroid();
+                }
+                if(bool_explode) {
+                    drawExplode();
                 }
             }
         };
