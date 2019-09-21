@@ -37,6 +37,8 @@
         fighter.y = canvas.height / 2;
         fighter.speed = 5;
 
+        var bool_fighterexplosion = false;
+
         var lasers = [];
         var laserTotal = 10;
 
@@ -109,7 +111,8 @@
                 fighter.y = canvas.height - 30;
             }
 
-            detectCollision();
+            detectLaserCollision();
+            detectFighterCollision();
         };
 
         var canFire = true;
@@ -188,7 +191,7 @@
             }
         }
 
-        function detectCollision() {
+        function detectLaserCollision() {
             var aw = asteroidImage.width * randScale;
             var ah = asteroidImage.height * randScale;
             var lw = laserImage.width;
@@ -196,14 +199,42 @@
 
             if(lasers.length) {
                 for(var i = 0; i < lasers.length; i++) {
-                    if(asteroid.x < lasers[i][0] + lw && asteroid.x + aw > lasers[i][0] && 
-                       asteroid.y < lasers[i][1] + lh && asteroid.y + ah > lasers[i][1]) {
+                    if(detectCollision(asteroid.x, asteroid.y, aw, ah, lasers[i][0], lasers[i][1], lw, lh)) {
                         explodes.push({"x": lasers[i][0], "y": lasers[i][1], "spriteCount": 0});
                         lasers.splice(i, 1);
                         reset();
                     }
                 }
             }
+        }
+
+        function detectFighterCollision() {
+            var aw = asteroidImage.width * randScale;
+            var ah = asteroidImage.height * randScale;
+            var fw = fighterImage.width;
+            var fh = fighterImage.height;
+
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(fighter.x, fighter.y, fw, fh);
+            ctx.strokeRect(asteroid.x, asteroid.y, aw, ah);
+
+            if(detectCollision(asteroid.x, asteroid.y, aw, ah, fighter.x, fighter.y, fw, fh)) {
+                explodes.push({"x": asteroid.x, "y": asteroid.y, "spriteCount": 0});
+                explodes.push({"x": fighter.x, "y": fighter.y, "spriteCount": 0});
+                bool_fighterexplosion = true;
+                reset();
+                resetFighter();
+            }
+        }
+
+        function detectCollision(ex, ey, ew, eh, px, py, pw, ph) {
+            return (ex < px + pw && ex + ew > px && ey < py + ph && ey + eh > py);
+        }
+
+        function resetFighter() {
+            fighter.x = 0;
+            fighter.y = canvas.height / 2;
         }
 
         function drawExplode() {
@@ -244,7 +275,14 @@
                     moveLaser();
                 }
                 if(bool_fighter) {
-                    ctx.drawImage(fighterImage, fighter.x, fighter.y);
+                    if(bool_fighterexplosion === true) {
+                        ctx.drawImage(fighterImage, fighter.x += 1, fighter.y);
+                        if(fighter.x >= 50) {
+                            bool_fighterexplosion = false;
+                        }
+                    } else {
+                        ctx.drawImage(fighterImage, fighter.x, fighter.y);
+                    }
                 }
                 if(bool_asteroid) {
                     moveAstroid();
