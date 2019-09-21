@@ -15,14 +15,43 @@
             background: #FFFFFF;
             border: #909090 1px solid;
         }
+        .myAudio {
+            display: none;
+        }
+        .sound {
+            position: absolute;
+            top: 20px;
+            left: 570px;
+            width: 30px;
+            height: 25px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .sound-on {
+            background-image: url("images/soundOn.png");
+            background-repeat: no-repeat;
+        }
+        .sound-off {
+            background-image: url("images/soundOff.png");
+            background-repeat: no-repeat;
+        }
     </style>
 </head>
 <body>
+    <div class="sound sound-on"></div>
+    <audio class="myAudio" autoplay loop>
+        <source src="sounds/bg.mp3" type="audio/mpeg">
+    </audio>
     <canvas id="myCanvas" width="600" height="400">Canvas를 지원하지 않습니다.</canvas>
     <script>
         var canvas = $("#myCanvas").get(0);
         /** @type {CanvasRenderingContext2D} */
         var ctx = canvas.getContext("2d");
+
+        var laserSound = new Audio("sounds/Laser.wav");
+        var explodeSound = new Audio("sounds/explosion.wav");
+        var hitexplodeSOund = new Audio("sounds/explosion-02.wav");
+        hitexplodeSOund.volume = 0.5;
 
         var keysDown = {};
         var lastUpdateTime = Date.now();
@@ -84,6 +113,12 @@
             bool_laser = true;
         };
 
+        function soundPlay() {
+            laserSound.volume = 0.12;
+            laserSound.load();
+            laserSound.play();
+        }
+
         var update = function() {
             if(87 in keysDown) {
                 fighter.y -= fighter.speed;
@@ -123,6 +158,7 @@
             if(e.keyCode === 32 && lasers.length <= laserTotal && canFire === true) {
                 lasers.push([fighter.x + 50, fighter.y + 10]);
                 canFire = false;
+                soundPlay();
             }
         }, false);
 
@@ -203,6 +239,8 @@
                         explodes.push({"x": lasers[i][0], "y": lasers[i][1], "spriteCount": 0});
                         lasers.splice(i, 1);
                         reset();
+                        hitexplodeSOund.load();
+                        hitexplodeSOund.play();
                     }
                 }
             }
@@ -225,6 +263,8 @@
                 bool_fighterexplosion = true;
                 reset();
                 resetFighter();
+                explodeSound.load();
+                explodeSound.play();
             }
         }
 
@@ -292,6 +332,20 @@
                 }
             }
         };
+
+        $(".sound").click(function() {
+            var $this = $(this);
+
+            if($this.hasClass("sound-on")) {
+                $this.removeClass("sound-on").addClass("sound-off");
+                $(".myAudio").trigger("pause");
+            } else {
+                $this.removeClass("sound-off").addClass("sound-on");
+                $(".myAudio").trigger("play");
+            }
+        });
+
+        $(".myAudio").prop("volume", 0.5);
 
         var main = function() {
             update();
