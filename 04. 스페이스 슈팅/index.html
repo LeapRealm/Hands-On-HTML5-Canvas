@@ -99,6 +99,8 @@
             if(fighter.y >= canvas.height - 30) {
                 fighter.y = canvas.height - 30;
             }
+
+            detectCollision();
         };
 
         var canFire = true;
@@ -145,7 +147,7 @@
         }
 
         var reset = function() {
-            speed = Math.floor(Math.random() * 5) + 5;
+            speed = Math.floor(Math.random() * 3) + 5;
             asteroid.x = canvas.width;
             asteroid.y = Math.floor(Math.random() * 350);
 
@@ -174,6 +176,23 @@
 
             if(asteroid.x < -100) {
                 reset();
+            }
+        }
+
+        function detectCollision() {
+            var aw = asteroidImage.width * randScale;
+            var ah = asteroidImage.height * randScale;
+            var lw = laserImage.width;
+            var lh = laserImage.height;
+
+            if(lasers.length) {
+                for(var i = 0; i < lasers.length; i++) {
+                    if(asteroid.x < lasers[i][0] + lw && asteroid.x + aw > lasers[i][0] && 
+                       asteroid.y < lasers[i][1] + lh && asteroid.y + ah > lasers[i][1]) {
+                        lasers.splice(i, 1);
+                        reset();
+                    }
+                }
             }
         }
 
