@@ -35,6 +35,22 @@
             background-image: url("images/soundOff.png");
             background-repeat: no-repeat;
         }
+        .lives {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            color: yellow;
+            font-size: 140%;
+            font-weight: bold;
+        }
+        .score {
+            position: absolute;
+            top: 10px;
+            left: 250px;
+            color: white;
+            font-size: 140%;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -43,6 +59,8 @@
         <source src="sounds/bg.mp3" type="audio/mpeg">
     </audio>
     <canvas id="myCanvas" width="600" height="400">Canvas를 지원하지 않습니다.</canvas>
+    <div class="lives">남은 생명 수 : <span id="lives">0</span></div>
+    <div class="score">현재 점수 : <span id="score">0</span></div>
     <script>
         var canvas = $("#myCanvas").get(0);
         /** @type {CanvasRenderingContext2D} */
@@ -82,6 +100,9 @@
 
         var explodes = [];
         var bool_explode = false;
+
+        var score = 0;
+        var lives = 3;
 
         var explodeImage = new Image();
         explodeImage.src = "images/explode.png";
@@ -155,7 +176,7 @@
         addEventListener("keydown", function(e) {
             keysDown[e.keyCode] = true;
 
-            if(e.keyCode === 32 && lasers.length <= laserTotal && canFire === true) {
+            if(e.keyCode === 32 && lasers.length <= laserTotal && canFire) {
                 lasers.push([fighter.x + 50, fighter.y + 10]);
                 canFire = false;
                 soundPlay();
@@ -241,6 +262,8 @@
                         reset();
                         hitexplodeSOund.load();
                         hitexplodeSOund.play();
+
+                        $("#score").text(Number($("#score").text()) + 100);
                     }
                 }
             }
@@ -251,12 +274,7 @@
             var ah = asteroidImage.height * randScale;
             var fw = fighterImage.width;
             var fh = fighterImage.height;
-
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(fighter.x, fighter.y, fw, fh);
-            ctx.strokeRect(asteroid.x, asteroid.y, aw, ah);
-
+            
             if(detectCollision(asteroid.x, asteroid.y, aw, ah, fighter.x, fighter.y, fw, fh)) {
                 explodes.push({"x": asteroid.x, "y": asteroid.y, "spriteCount": 0});
                 explodes.push({"x": fighter.x, "y": fighter.y, "spriteCount": 0});
@@ -265,6 +283,13 @@
                 resetFighter();
                 explodeSound.load();
                 explodeSound.play();
+
+                if(lives <= 0) {
+                    lives = 0;
+                } else {
+                    lives--;
+                }
+                $("#lives").text(lives);
             }
         }
 
@@ -353,6 +378,7 @@
             requestAnimationFrame(main);
         };
 
+        $("#lives").text(lives);
         var background = new Background();
         reset();
         main();
