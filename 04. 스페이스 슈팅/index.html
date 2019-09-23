@@ -51,6 +51,25 @@
             font-size: 140%;
             font-weight: bold;
         }
+        .game-over {
+            position: absolute;
+            top: 100px;
+            left: 210px;
+            color: #FF7F00;
+            font-family: Helvetica, sans-serif;
+            font-size: 30px;
+            cursor: default;
+            display: none;
+        }
+        .game-over span {
+            font-size: 20px;
+            cursor: pointer;
+            position: relative;
+            left: 50px;
+        }
+        .game-over span:hover {
+            color: #FFD700;
+        }
     </style>
 </head>
 <body>
@@ -61,6 +80,9 @@
     <canvas id="myCanvas" width="600" height="400">Canvas를 지원하지 않습니다.</canvas>
     <div class="lives">남은 생명 수 : <span id="lives">0</span></div>
     <div class="score">현재 점수 : <span id="score">0</span></div>
+    <div class="game-over" id="game-over">GAME OVER
+        <p><span id="restart">[Restart]</span></p>
+    </div>
     <script>
         var canvas = $("#myCanvas").get(0);
         /** @type {CanvasRenderingContext2D} */
@@ -102,7 +124,14 @@
         var bool_explode = false;
 
         var score = 0;
-        var lives = 3;
+        var lives = 2;
+
+        var isGameOver = false;
+
+        var gameOverSound = new Audio("sounds/game_over.wav");
+        gameOverSound.loop = true;
+        gameOverSound.volume = 0.25;
+        gameOverSound.load();
 
         var explodeImage = new Image();
         explodeImage.src = "images/explode.png";
@@ -286,6 +315,7 @@
 
                 if(lives <= 0) {
                     lives = 0;
+                    gameOver();
                 } else {
                     lives--;
                 }
@@ -314,6 +344,39 @@
                     }
                 }
             }
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            bool_explode = false;
+
+            $(".myAudio").removeClass("sound-on").addClass("sound-off");
+            $(".myAudio").trigger("pause");
+            $(".myAudio").prop("currentTime", 0);
+
+            var isSoundOn = $(".sound").hasClass("sound-on");
+            if(isSoundOn) {
+                gameOverSound.currentTime = 0;
+                gameOverSound.play();
+            }
+            $("#game-over").css("display", "block");
+        }
+
+        function restart() {
+            isGameOver = false;
+            bool_explode = true;
+            if($(".sound").hasClass("sound-on")) {
+                $(".myAudio").trigger("play");
+            } else {
+                $(".myAudio").trigger("pause");
+            }
+            gameOverSound.currentTime = 0;
+            gameOverSound.pause();
+            $("#game-over").css("display", "none");
+            lives = 2;
+            score = 0;
+            $("#lives").text(lives);
+            $("#score").text(score);
         }
 
         var Background = function() {
@@ -360,21 +423,40 @@
 
         $(".sound").click(function() {
             var $this = $(this);
+            var isSoundOn = $this.hasClass("sound-on");
 
-            if($this.hasClass("sound-on")) {
+            if(isSoundOn) {
                 $this.removeClass("sound-on").addClass("sound-off");
-                $(".myAudio").trigger("pause");
             } else {
                 $this.removeClass("sound-off").addClass("sound-on");
-                $(".myAudio").trigger("play");
+            }
+
+            if(isGameOver) {
+                if(isSoundOn) {
+                    gameOverSound.pause();
+                } else {
+                    gameOverSound.play();
+                }
+            } else {
+                if(isSoundOn) {
+                    $(".myAudio").trigger("pause");
+                } else {
+                    $(".myAudio").trigger("play")
+                }
             }
         });
 
         $(".myAudio").prop("volume", 0.5);
 
+        $("#restart").click(function() {
+            restart();
+        });
+
         var main = function() {
             update();
-            render();
+            if(!isGameOver) {
+                render();
+            }
             requestAnimationFrame(main);
         };
 
