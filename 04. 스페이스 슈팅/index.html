@@ -2,17 +2,468 @@
 
 <html lang="ko">
 <head>
-    <title>Canvas</title>
+    <title>스페이스 슈팅</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.0.min.js"></script>
+    <style>
+        body {
+            margin: 10px;
+            background: #D0D0D0;
+        }
+        #myCanvas {
+            background: #FFFFFF;
+            border: #909090 1px solid;
+        }
+        .myAudio {
+            display: none;
+        }
+        .sound {
+            position: absolute;
+            top: 20px;
+            left: 570px;
+            width: 30px;
+            height: 25px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .sound-on {
+            background-image: url("images/soundOn.png");
+            background-repeat: no-repeat;
+        }
+        .sound-off {
+            background-image: url("images/soundOff.png");
+            background-repeat: no-repeat;
+        }
+        .lives {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            color: yellow;
+            font-size: 140%;
+            font-weight: bold;
+        }
+        .score {
+            position: absolute;
+            top: 10px;
+            left: 250px;
+            color: white;
+            font-size: 140%;
+            font-weight: bold;
+        }
+        .game-over {
+            position: absolute;
+            top: 100px;
+            left: 210px;
+            color: #FF7F00;
+            font-family: Helvetica, sans-serif;
+            font-size: 30px;
+            cursor: default;
+            display: none;
+        }
+        .game-over span {
+            font-size: 20px;
+            cursor: pointer;
+            position: relative;
+            left: 50px;
+        }
+        .game-over span:hover {
+            color: #FFD700;
+        }
+    </style>
 </head>
 <body>
-    <canvas id="myCanvas" width="400" height="300">Canvas를 지원하지 않습니다.</canvas>
+    <div class="sound sound-on"></div>
+    <audio class="myAudio" autoplay loop>
+        <source src="sounds/bg.mp3" type="audio/mpeg">
+    </audio>
+    <canvas id="myCanvas" width="600" height="400">Canvas를 지원하지 않습니다.</canvas>
+    <div class="lives">남은 생명 수 : <span id="lives">0</span></div>
+    <div class="score">현재 점수 : <span id="score">0</span></div>
+    <div class="game-over" id="game-over">GAME OVER
+        <p><span id="restart">[Restart]</span></p>
+    </div>
     <script>
         var canvas = $("#myCanvas").get(0);
         /** @type {CanvasRenderingContext2D} */
         var ctx = canvas.getContext("2d");
+
+        var laserSound = new Audio("sounds/Laser.wav");
+        var explodeSound = new Audio("sounds/explosion.wav");
+        var hitexplodeSOund = new Audio("sounds/explosion-02.wav");
+        hitexplodeSOund.volume = 0.5;
+
+        var keysDown = {};
+        var lastUpdateTime = Date.now();
+        var msPerFrame = 16;
+
+        var bool_bg = false;
+        var bool_fighter = false;
+        var bool_laser = false;
+
+        var fighter = {};
+        fighter.x = 50;
+        fighter.y = canvas.height / 2;
+        fighter.speed = 5;
+
+        var bool_fighterexplosion = false;
+
+        var lasers = [];
+        var laserTotal = 10;
+
+        var asteroid = {};
+        asteroid.x = canvas.width;
+        asteroid.y = Math.floor(Math.random() * 350);
+        var bool_asteroid = false;
+        var speed = 0;
+        var randScale;
+        var ang = 0;
+        var arrScale = [0.4, 0.6, 0.8, 1];
+
+        var explodes = [];
+        var bool_explode = false;
+
+        var score = 0;
+        var lives = 2;
+
+        var isGameOver = false;
+
+        var gameOverSound = new Audio("sounds/game_over.wav");
+        gameOverSound.loop = true;
+        gameOverSound.volume = 0.25;
+        gameOverSound.load();
+
+        var explodeImage = new Image();
+        explodeImage.src = "images/explode.png";
+        explodeImage.onload = function() {
+            bool_explode = true;
+        };
+
+        var asteroidImage = new Image();
+        asteroidImage.src = "images/asteroid.png";
+        asteroidImage.onload = function() {
+            bool_asteroid = true;
+        };
+
+        var bgImage = new Image();
+        bgImage.src = "images/space.png";
+        bgImage.onload = function() {
+            bool_bg = true;
+        };
+
+        var fighterImage = new Image();
+        fighterImage.src = "images/fighter.png";
+        fighterImage.onload = function() {
+            bool_fighter = true;
+        };
+
+        var laserImage = new Image();
+        laserImage.src = "images/laser.png";
+        laserImage.onload = function() {
+            bool_laser = true;
+        };
+
+        function soundPlay() {
+            laserSound.volume = 0.12;
+            laserSound.load();
+            laserSound.play();
+        }
+
+        var update = function() {
+            if(87 in keysDown) {
+                fighter.y -= fighter.speed;
+            }
+            if(83 in keysDown) {
+                fighter.y += fighter.speed;
+            }
+            if(65 in keysDown) {
+                fighter.x -= fighter.speed;
+            }
+            if(68 in keysDown) {
+                fighter.x += fighter.speed;
+            }
+
+            if(fighter.x <= 0) {
+                fighter.x = 0;
+            }
+            if(fighter.x >= canvas.width - 60) {
+                fighter.x = canvas.width - 60;
+            }
+            if(fighter.y <= 0) {
+                fighter.y = 0;
+            }
+            if(fighter.y >= canvas.height - 30) {
+                fighter.y = canvas.height - 30;
+            }
+
+            detectLaserCollision();
+            detectFighterCollision();
+        };
+
+        var canFire = true;
+
+        addEventListener("keydown", function(e) {
+            keysDown[e.keyCode] = true;
+
+            if(e.keyCode === 32 && lasers.length <= laserTotal && canFire) {
+                lasers.push([fighter.x + 50, fighter.y + 10]);
+                canFire = false;
+                soundPlay();
+            }
+        }, false);
+
+        addEventListener("keyup", function(e) {
+            delete keysDown[e.keyCode];
+
+            if(e.keyCode === 32) {
+                canFire = true;
+            }
+        }, false);
+
+        function drawLaser() {
+            if(lasers.length) {
+                for(var i = 0; i < lasers.length; i++) {
+                    ctx.drawImage(laserImage, lasers[i][0], lasers[i][1]);
+                }
+            }
+        }
+
+        function moveLaser() {
+            for(var i = 0; i < lasers.length; i++) {
+                if(lasers[i][0] > 0) {
+                    lasers[i][0] += 20;
+                }
+                if(lasers[i][0] > 600) {
+                    lasers.splice(i, 1);
+                }
+            }
+        }
+
+        function shuffle(arr) {
+            var rand = Math.floor((Math.random() * arr.length));
+            return arr[rand];
+        }
+
+        var reset = function() {
+            speed = Math.floor(Math.random() * 3) + 5;
+            asteroid.x = canvas.width;
+            asteroid.y = Math.floor(Math.random() * 350);
+
+            if(asteroid.y < 40) {
+                asteroid.y = 40;
+            }
+            if(asteroid.y > 360) {
+                asteroid.y = 360;
+            }
+
+            randScale = shuffle(arrScale);
+        };
+
+        function moveAstroid() {
+            var w = asteroidImage.width * randScale;
+            var h = asteroidImage.height * randScale;
+            var coordX = (asteroidImage.width / 2) * randScale;
+            var coordY = (asteroidImage.height / 2) * randScale;
+
+            ctx.save();
+            ctx.translate(asteroid.x + coordX, asteroid.y + coordY);
+            ctx.rotate(Math.PI / 180 * (ang += 5));
+            ctx.translate(-asteroid.x - coordX, -asteroid.y - coordY);
+            ctx.drawImage(asteroidImage, asteroid.x -= speed, asteroid.y, w, h);
+            ctx.restore();
+
+            if(asteroid.x < -100) {
+                reset();
+            }
+        }
+
+        function detectLaserCollision() {
+            var aw = asteroidImage.width * randScale;
+            var ah = asteroidImage.height * randScale;
+            var lw = laserImage.width;
+            var lh = laserImage.height;
+
+            if(lasers.length) {
+                for(var i = 0; i < lasers.length; i++) {
+                    if(detectCollision(asteroid.x, asteroid.y, aw, ah, lasers[i][0], lasers[i][1], lw, lh)) {
+                        explodes.push({"x": lasers[i][0], "y": lasers[i][1], "spriteCount": 0});
+                        lasers.splice(i, 1);
+                        reset();
+                        hitexplodeSOund.load();
+                        hitexplodeSOund.play();
+
+                        $("#score").text(Number($("#score").text()) + 100);
+                    }
+                }
+            }
+        }
+
+        function detectFighterCollision() {
+            var aw = asteroidImage.width * randScale;
+            var ah = asteroidImage.height * randScale;
+            var fw = fighterImage.width;
+            var fh = fighterImage.height;
+            
+            if(detectCollision(asteroid.x, asteroid.y, aw, ah, fighter.x, fighter.y, fw, fh)) {
+                explodes.push({"x": asteroid.x, "y": asteroid.y, "spriteCount": 0});
+                explodes.push({"x": fighter.x, "y": fighter.y, "spriteCount": 0});
+                bool_fighterexplosion = true;
+                reset();
+                resetFighter();
+                explodeSound.load();
+                explodeSound.play();
+
+                if(lives <= 0) {
+                    lives = 0;
+                    gameOver();
+                } else {
+                    lives--;
+                }
+                $("#lives").text(lives);
+            }
+        }
+
+        function detectCollision(ex, ey, ew, eh, px, py, pw, ph) {
+            return (ex < px + pw && ex + ew > px && ey < py + ph && ey + eh > py);
+        }
+
+        function resetFighter() {
+            fighter.x = 0;
+            fighter.y = canvas.height / 2;
+        }
+
+        function drawExplode() {
+            if(explodes.length) {
+                for(var i = 0; i < explodes.length; i++) {
+                    ctx.drawImage(explodeImage, explodes[i].spriteCount * 39, 0, 39, 40, 
+                    explodes[i].x, explodes[i].y, 39*2, 40*2);
+
+                    explodes[i].spriteCount++;
+                    if(explodes[i].spriteCount > 13) {
+                        explodes.splice(i, 1);
+                    }
+                }
+            }
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            bool_explode = false;
+
+            $(".myAudio").removeClass("sound-on").addClass("sound-off");
+            $(".myAudio").trigger("pause");
+            $(".myAudio").prop("currentTime", 0);
+
+            var isSoundOn = $(".sound").hasClass("sound-on");
+            if(isSoundOn) {
+                gameOverSound.currentTime = 0;
+                gameOverSound.play();
+            }
+            $("#game-over").css("display", "block");
+        }
+
+        function restart() {
+            isGameOver = false;
+            bool_explode = true;
+            if($(".sound").hasClass("sound-on")) {
+                $(".myAudio").trigger("play");
+            } else {
+                $(".myAudio").trigger("pause");
+            }
+            gameOverSound.currentTime = 0;
+            gameOverSound.pause();
+            $("#game-over").css("display", "none");
+            lives = 2;
+            score = 0;
+            $("#lives").text(lives);
+            $("#score").text(score);
+        }
+
+        var Background = function() {
+            this.x = 0, this.y = 0;
+
+            this.render = function() {
+                ctx.drawImage(bgImage, this.x--, 0);
+                
+                if(this.x <= -600) {
+                    this.x = 0;
+                }
+            };
+        };
+
+        var render = function() {
+            if(Date.now() > lastUpdateTime + msPerFrame) {
+                lastUpdateTime = Date.now();
+
+                if(bool_bg) {
+                    background.render();
+                }
+                if(bool_laser) {
+                    drawLaser();
+                    moveLaser();
+                }
+                if(bool_fighter) {
+                    if(bool_fighterexplosion === true) {
+                        ctx.drawImage(fighterImage, fighter.x += 1, fighter.y);
+                        if(fighter.x >= 50) {
+                            bool_fighterexplosion = false;
+                        }
+                    } else {
+                        ctx.drawImage(fighterImage, fighter.x, fighter.y);
+                    }
+                }
+                if(bool_asteroid) {
+                    moveAstroid();
+                }
+                if(bool_explode) {
+                    drawExplode();
+                }
+            }
+        };
+
+        $(".sound").click(function() {
+            var $this = $(this);
+            var isSoundOn = $this.hasClass("sound-on");
+
+            if(isSoundOn) {
+                $this.removeClass("sound-on").addClass("sound-off");
+            } else {
+                $this.removeClass("sound-off").addClass("sound-on");
+            }
+
+            if(isGameOver) {
+                if(isSoundOn) {
+                    gameOverSound.pause();
+                } else {
+                    gameOverSound.play();
+                }
+            } else {
+                if(isSoundOn) {
+                    $(".myAudio").trigger("pause");
+                } else {
+                    $(".myAudio").trigger("play")
+                }
+            }
+        });
+
+        $(".myAudio").prop("volume", 0.5);
+
+        $("#restart").click(function() {
+            restart();
+        });
+
+        var main = function() {
+            update();
+            if(!isGameOver) {
+                render();
+            }
+            requestAnimationFrame(main);
+        };
+
+        $("#lives").text(lives);
+        var background = new Background();
+        reset();
+        main();
     </script>
 </body>
 </html>
