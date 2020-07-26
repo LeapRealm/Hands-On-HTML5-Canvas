@@ -9,10 +9,9 @@
 
 ## 실행방법
 * [**여기**](https://github.com/LeapRealm/Hands-On-HTML5-Canvas/archive/master.zip)에서 압축파일을 다운로드해서 압축을 풀거나 깃 사용법을 안다면 저장소를 클론합니다.
-* 각 폴더 안의 .html 파일을 더블클릭해서 크롬에서 실행합니다.
+* 각 폴더 안의 `.html` 파일을 더블클릭해서 크롬에서 실행합니다.
 
-## TODO
-- [X] Canvas의 기초
+## 게임목록
 - [X] 두더지 잡기
 - [X] 꿀벌의 여행
 - [X] 스페이스 슈팅
